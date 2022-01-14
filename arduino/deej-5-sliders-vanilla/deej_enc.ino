@@ -1,17 +1,28 @@
 #include "PinChangeInterrupt.h"   // NicoHood's library
 
-const int NUM_ENCODERS = 5;
+#define USE_BUTTONS 1
 
+#define ENC_BUTTON_DEBOUNCE 50
+
+const int NUM_ENCODERS = 5;
 const int encoderPinsA[NUM_ENCODERS] = {2, 3, 4, 5, 6};
 const int encoderPinsB[NUM_ENCODERS] = {8, 9, 10, 11, 12};
 
+#ifdef USE_BUTTONS
+  const int encoderButtons[NUM_ENCODERS] = {A0, A1, A2, A3, A4};  // can use analog pins, they will act as digital pins for this
+#endif
+
 int encoderValues[NUM_ENCODERS] = {512, 512, 512, 512, 512};    // set these to the initial values your deej will start with (0-1023)
+int encoderMute[NUM_ENCODERS] = {0, 0, 0, 0, 0};                // unused unless using buttons as mute
 const int enc_inc = 1023/100;                                   // set this to the step size each 'click' will increment/decrement
                                                                 // e.g. 1023/100 means roughly 100 'clicks' between 0% and 100% volume (moving 10 each click, between 0 and 1023)
 void setup() {   
   for(int i = 0; i < NUM_ENCODERS; i++){
     pinMode(encoderPinsA[i], INPUT_PULLUP);     // change to INPUT if using external pullup resistors
-    pinMode(encoderPinsB[i], INPUT_PULLUP);     // change to INPUT if using external pullup resistors     
+    pinMode(encoderPinsB[i], INPUT_PULLUP);     // change to INPUT if using external pullup resistors   
+    #ifdef USE_BUTTONS
+      pinMode(encoderButtons[i], INPUT_PULLUP);
+    #endif  
   }
 
   // A new set of ISRs will need to be added for each encoder, see bottom of sketch
@@ -26,6 +37,14 @@ void setup() {
   attachPCINT(digitalPinToPCINT(encoderPinsB[2]), EN2_B_ISR, CHANGE);
   attachPCINT(digitalPinToPCINT(encoderPinsB[3]), EN3_B_ISR, CHANGE);
   attachPCINT(digitalPinToPCINT(encoderPinsB[4]), EN4_B_ISR, CHANGE);
+
+  #ifdef USE_BUTTONS
+    attachPCINT(digitalPinToPCINT(encoderButtons[0]), EN0_BUTTON_ISR, CHANGE);
+    attachPCINT(digitalPinToPCINT(encoderButtons[1]), EN1_BUTTON_ISR, CHANGE);
+    attachPCINT(digitalPinToPCINT(encoderButtons[2]), EN2_BUTTON_ISR, CHANGE);
+    attachPCINT(digitalPinToPCINT(encoderButtons[3]), EN3_BUTTON_ISR, CHANGE);
+    attachPCINT(digitalPinToPCINT(encoderButtons[4]), EN4_BUTTON_ISR, CHANGE);
+  #endif
   
   Serial.begin(9600);
 }
@@ -40,7 +59,7 @@ void sendEncoderValues() {
   String builtString = String("");
 
   for (int i = 0; i < NUM_ENCODERS; i++) {
-    builtString += String((int)encoderValues[i]);
+    builtString += String((int)(encoderValues[i] - (encoderValues[i]*encoderMute[i]))) ;  // the -encoderValue*encoderMute will either subtract the value to 0 (muted) or do nothing to the value (unmuted)
 
     if (i < NUM_ENCODERS - 1) {
       builtString += String("|");
@@ -50,6 +69,45 @@ void sendEncoderValues() {
   Serial.println(builtString);
 }
 
+#ifdef USE_BUTTONS
+  /******************/
+  /* ENCODER Button ISRs */
+  /******************/
+  void EN0_BUTTON_ISR(){
+    encoderMute[0] ^= 1;                   // ^= operator toggles between 1 and 0
+    delay(ENC_BUTTON_DEBOUNCE);            // wait for encoder bounce (bad practice to have delays in ISRs, by the way... but it's just easier here)
+    while(!digitalRead(encoderButtons[0])); // after bounce, wait for button to be released
+    delay(ENC_BUTTON_DEBOUNCE);            // wait for the release encoder bounce
+  }
+
+  void EN1_BUTTON_ISR(){
+    encoderMute[1] ^= 1;                   // ^= operator toggles between 1 and 0
+    delay(ENC_BUTTON_DEBOUNCE);            // wait for encoder bounce (bad practice to have delays in ISRs, by the way... but it's just easier here)
+    while(!digitalRead(encoderButtons[1])); // after bounce, wait for button to be released
+    delay(ENC_BUTTON_DEBOUNCE);            // wait for the release encoder bounce
+  }
+
+  void EN2_BUTTON_ISR(){
+    encoderMute[2] ^= 1;                   // ^= operator toggles between 1 and 0
+    delay(ENC_BUTTON_DEBOUNCE);            // wait for encoder bounce (bad practice to have delays in ISRs, by the way... but it's just easier here)
+    while(!digitalRead(encoderButtons[2])); // after bounce, wait for button to be released
+    delay(ENC_BUTTON_DEBOUNCE);            // wait for the release encoder bounce
+  }
+
+  void EN3_BUTTON_ISR(){
+    encoderMute[3] ^= 1;                   // ^= operator toggles between 1 and 0
+    delay(ENC_BUTTON_DEBOUNCE);            // wait for encoder bounce (bad practice to have delays in ISRs, by the way... but it's just easier here)
+    while(!digitalRead(encoderButtons[3])); // after bounce, wait for button to be released
+    delay(ENC_BUTTON_DEBOUNCE);            // wait for the release encoder bounce
+  }
+
+  void EN4_BUTTON_ISR(){
+    encoderMute[4] ^= 1;                   // ^= operator toggles between 1 and 0
+    delay(ENC_BUTTON_DEBOUNCE);            // wait for encoder bounce (bad practice to have delays in ISRs, by the way... but it's just easier here)
+    while(!digitalRead(encoderButtons[4])); // after bounce, wait for button to be released
+    delay(ENC_BUTTON_DEBOUNCE);            // wait for the release encoder bounce
+  }
+#endif
 /******************/
 /* ENCODER 0 ISRs */
 /******************/
