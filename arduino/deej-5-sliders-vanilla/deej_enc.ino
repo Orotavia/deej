@@ -4,8 +4,9 @@
 
 #define ENC_BUTTON_DEBOUNCE 50
 
+// Check that all pins you define in this sketch (encoderPinsA, encoderPinsB, and encoderButtons (if using)) support PCINTs - Google it for your specific board :)
 const int NUM_ENCODERS = 5;
-const int encoderPinsA[NUM_ENCODERS] = {2, 3, 4, 5, 6};
+const int encoderPinsA[NUM_ENCODERS] = {2, 3, 4, 5, 6};     
 const int encoderPinsB[NUM_ENCODERS] = {8, 9, 10, 11, 12};
 
 #ifdef USE_BUTTONS
@@ -39,11 +40,11 @@ void setup() {
   attachPCINT(digitalPinToPCINT(encoderPinsB[4]), EN4_B_ISR, CHANGE);
 
   #ifdef USE_BUTTONS
-    attachPCINT(digitalPinToPCINT(encoderButtons[0]), EN0_BUTTON_ISR, CHANGE);
-    attachPCINT(digitalPinToPCINT(encoderButtons[1]), EN1_BUTTON_ISR, CHANGE);
-    attachPCINT(digitalPinToPCINT(encoderButtons[2]), EN2_BUTTON_ISR, CHANGE);
-    attachPCINT(digitalPinToPCINT(encoderButtons[3]), EN3_BUTTON_ISR, CHANGE);
-    attachPCINT(digitalPinToPCINT(encoderButtons[4]), EN4_BUTTON_ISR, CHANGE);
+    attachPCINT(digitalPinToPCINT(encoderButtons[0]), EN0_BUTTON_ISR, FALLING);
+    attachPCINT(digitalPinToPCINT(encoderButtons[1]), EN1_BUTTON_ISR, FALLING);
+    attachPCINT(digitalPinToPCINT(encoderButtons[2]), EN2_BUTTON_ISR, FALLING);
+    attachPCINT(digitalPinToPCINT(encoderButtons[3]), EN3_BUTTON_ISR, FALLING);
+    attachPCINT(digitalPinToPCINT(encoderButtons[4]), EN4_BUTTON_ISR, FALLING);
   #endif
   
   Serial.begin(9600);
