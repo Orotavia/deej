@@ -28,11 +28,12 @@ void setup() {
   }
 
   // A new set of ISRs will need to be added for each encoder, see bottom of sketch
-  attachPCINT(digitalPinToPCINT(encoderPinsA[0]), EN0_A_ISR, CHANGE);
-  attachPCINT(digitalPinToPCINT(encoderPinsA[1]), EN1_A_ISR, CHANGE);
-  attachPCINT(digitalPinToPCINT(encoderPinsA[2]), EN2_A_ISR, CHANGE);
-  attachPCINT(digitalPinToPCINT(encoderPinsA[3]), EN3_A_ISR, CHANGE);
-  attachPCINT(digitalPinToPCINT(encoderPinsA[4]), EN4_A_ISR, CHANGE);
+  // Change FALLING to CHANGE if your encoders only update every two clicks
+  attachPCINT(digitalPinToPCINT(encoderPinsA[0]), EN0_A_ISR, FALLING);
+  attachPCINT(digitalPinToPCINT(encoderPinsA[1]), EN1_A_ISR, FALLING);
+  attachPCINT(digitalPinToPCINT(encoderPinsA[2]), EN2_A_ISR, FALLING);
+  attachPCINT(digitalPinToPCINT(encoderPinsA[3]), EN3_A_ISR, FALLING);
+  attachPCINT(digitalPinToPCINT(encoderPinsA[4]), EN4_A_ISR, FALLING);
  
   Serial.begin(9600);
 }
@@ -43,7 +44,7 @@ void loop() {
   delay(10);
   #ifdef USE_BUTTONS
     for(int i = 0; i < NUM_ENCODERS; i++){
-      if(digitalRead(encoderButtons[i])){
+      if(!digitalRead(encoderButtons[i])){
         encoderMute[i] ^= 1;                   // ^= operator toggles between 1 and 0
         delay(ENC_BUTTON_DEBOUNCE);            // wait for encoder bounce (halts serial data, but presumably you aren't turning a knob while also holding mute)
         while(!digitalRead(encoderButtons[i])); // after bounce, wait for button to be released
